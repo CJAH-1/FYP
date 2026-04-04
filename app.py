@@ -1,129 +1,142 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import os
 
 app = Flask(__name__)
+app.secret_key = "secret123"  # change this later
 
 DB = "database/db.sqlite3"
 
-# Ensure database folder exists
 def get_db():
     os.makedirs("database", exist_ok=True)
     return sqlite3.connect(DB)
 
-# Initialize database
 def init_db():
     conn = get_db()
     cur = conn.cursor()
 
+    # Users table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    # Transactions
     cur.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         amount REAL,
         category TEXT,
         type TEXT,
-        date TEXT
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS budget (
-        id INTEGER PRIMARY KEY,
-        total REAL
+        date TEXT,
+        user_id INTEGER
     )
     """)
 
     conn.commit()
     conn.close()
 
-# 🔹 Home page (ONLY GET)
-@app.route("/")
-def index():
+# 🔐 LOGIN / SIGNUP PAGE
+@app.route("/", methods=["GET", "POST"])
+def login():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM transactions ORDER BY date DESC")
+    if request.method == "POST":
+        action = request.form["action"]
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if action == "signup":
+            try:
+                cur.execute(
+                    "INSERT INTO users (username, password) VALUES (?, ?)",
+                    (username, password)
+                )
+                conn.commit()
+            except:
+                return "User already exists"
+
+        elif action == "login":
+            cur.execute(
+                "SELECT * FROM users WHERE username=? AND password=?",
+                (username, password)
+            )
+            user = cur.fetchone()
+
+            if user:
+                session["user_id"] = user[0]
+                session["username"] = user[1]
+                return redirect("/home")
+            else:
+                return "Invalid login"
+
+    conn.close()
+    return render_template("login.html")
+
+# 🏠 HOME PAGE
+@app.route("/home")
+def home():
+    if "user_id" not in session:
+        return redirect("/")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT * FROM transactions WHERE user_id=? ORDER BY date DESC",
+        (session["user_id"],)
+    )
     transactions = cur.fetchall()
 
-    # Calculate totals
     income = sum(t[1] for t in transactions if t[3] == "income")
     expenses = sum(t[1] for t in transactions if t[3] == "expense")
-
-    # 🔥 FIX: budget NOT included in remaining
     remaining = income - expenses
-
-    # Get budget (display only)
-    cur.execute("SELECT total FROM budget WHERE id=1")
-    row = cur.fetchone()
-    budget = row[0] if row else 0
-
-    # Group by category (expenses only)
-    categories = {}
-    for t in transactions:
-        if t[3] == "expense":
-            categories[t[2]] = categories.get(t[2], 0) + t[1]
 
     conn.close()
 
     return render_template(
         "index.html",
+        username=session["username"],
         transactions=transactions,
         income=income,
         expenses=expenses,
-        budget=budget,
-        remaining=remaining,
-        categories=categories
+        remaining=remaining
     )
 
-# 🔹 Add transaction
+# ➕ ADD TRANSACTION
 @app.route("/add", methods=["POST"])
 def add_transaction():
+    if "user_id" not in session:
+        return redirect("/")
+
     conn = get_db()
     cur = conn.cursor()
 
-    amount = float(request.form["amount"])
-    category = request.form["category"]
-    t_type = request.form["type"]
-    date = request.form["date"]
-
     cur.execute(
-        "INSERT INTO transactions (amount, category, type, date) VALUES (?, ?, ?, ?)",
-        (amount, category, t_type, date)
+        "INSERT INTO transactions (amount, category, type, date, user_id) VALUES (?, ?, ?, ?, ?)",
+        (
+            float(request.form["amount"]),
+            request.form["category"],
+            request.form["type"],
+            request.form["date"],
+            session["user_id"]
+        )
     )
 
     conn.commit()
     conn.close()
 
-    return redirect("/")
+    return redirect("/home")
 
-# 🔹 Reset everything
-@app.route("/reset", methods=["POST"])
-def reset():
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM transactions")
-    cur.execute("DELETE FROM budget")
-
-    conn.commit()
-    conn.close()
-
-    return redirect("/")
-
-# 🔹 Set budget (display only)
-@app.route("/set_budget", methods=["POST"])
-def set_budget():
-    amount = float(request.form["budget"])
-
-    conn = get_db()
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM budget")
-    cur.execute("INSERT INTO budget (id, total) VALUES (1, ?)", (amount,))
-
-    conn.commit()
-    conn.close()
-
+# 🚪 LOGOUT
+@app.route("/logout")
+def logout():
+    session.clear()
     return redirect("/")
 
 if __name__ == "__main__":

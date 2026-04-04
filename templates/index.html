@@ -5,16 +5,10 @@
 </head>
 <body>
 
-<h1>Finance Tracker</h1>
+<h1>Hello, {{ username }} 👋</h1>
 
-<!-- SET BUDGET -->
-<h2>Set Monthly Budget</h2>
-<form method="POST" action="/set_budget">
-    <input type="number" step="0.01" name="budget" required>
-    <button type="submit">Set Budget</button>
-</form>
+<a href="/logout">Logout</a>
 
-<!-- ADD TRANSACTION -->
 <h2>Add Transaction</h2>
 <form method="POST" action="/add">
     <input type="number" step="0.01" name="amount" placeholder="Amount" required>
@@ -37,36 +31,17 @@
     <button type="submit">Add</button>
 </form>
 
-<!-- SUMMARY -->
 <h2>Summary</h2>
-<p>Budget: £{{ budget }}</p>
-<p>Income: £{{ income }}</p>
-<p>Expenses: £{{ expenses }}</p>
-<p><strong>Balance: £{{ "%.2f"|format(remaining) }}</strong></p>
+<p>Income: £{{ "%.2f"|format(income) }}</p>
+<p>Expenses: £{{ "%.2f"|format(expenses) }}</p>
+<p><strong>Remaining: £{{ "%.2f"|format(remaining) }}</strong></p>
 
-<!-- CATEGORY BREAKDOWN -->
-<h2>Category Spending</h2>
-<ul>
-{% for cat, value in categories.items() %}
-    <li>{{ cat }}: £{{ value }}</li>
-{% endfor %}
-</ul>
-
-<!-- TRANSACTIONS -->
 <h2>Transactions</h2>
 <ul>
 {% for t in transactions %}
-    <li>
-        {{ t[4] }} | {{ t[2] }} | {{ t[3] }} | £{{ t[1] }}
-    </li>
+    <li>{{ t[4] }} | {{ t[2] }} | {{ t[3] }} | £{{ t[1] }}</li>
 {% endfor %}
 </ul>
-
-
-
-<form method="POST" action="/reset" onsubmit="return confirm('Are you sure you want to delete all data?');">
-    <button type="submit">Reset All Data</button>
-</form>
 
 </body>
 </html>
