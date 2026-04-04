@@ -108,6 +108,33 @@ def home():
         remaining=remaining
     )
 
+#routes
+
+# 🔹 Budget page
+@app.route("/budget")
+def budget():
+    if "user_id" not in session:
+        return redirect("/")
+    return render_template("budget.html", username=session["username"])
+
+
+# 🔹 Statistics page
+@app.route("/statistics")
+def statistics():
+    if "user_id" not in session:
+        return redirect("/")
+    return render_template("statistics.html", username=session["username"])
+
+
+# 🔹 Settings page
+@app.route("/settings")
+def settings():
+    if "user_id" not in session:
+        return redirect("/")
+    return render_template("settings.html", username=session["username"])
+
+
+
 # ➕ ADD TRANSACTION
 @app.route("/add", methods=["POST"])
 def add_transaction():
