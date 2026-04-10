@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import os
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -36,7 +37,7 @@ def init_db():
     )
     """)
 
-    # ✅ FIXED: Budget is now per user
+    # BUDGET (per user)
     cur.execute("""
     CREATE TABLE IF NOT EXISTS budget (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +49,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 🔐 LOGIN / SIGNUP
+# 🔐 LOGIN + SIGNUP
 @app.route("/", methods=["GET", "POST"])
 def login():
     conn = get_db()
@@ -59,29 +60,39 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
+        # SIGN UP
         if action == "signup":
             try:
+                hashed_password = generate_password_hash(password)
+
                 cur.execute(
                     "INSERT INTO users (username, password) VALUES (?, ?)",
-                    (username, password)
+                    (username, hashed_password)
                 )
                 conn.commit()
-            except:
-                return "User already exists"
 
+                success = "Account created! You can now log in."
+                return render_template("login.html", success=success)
+
+            except:
+                error = "Username already exists"
+                return render_template("login.html", error=error)
+
+        # LOGIN
         elif action == "login":
             cur.execute(
-                "SELECT * FROM users WHERE username=? AND password=?",
-                (username, password)
+                "SELECT * FROM users WHERE username=?",
+                (username,)
             )
             user = cur.fetchone()
 
-            if user:
+            if user and check_password_hash(user[2], password):
                 session["user_id"] = user[0]
                 session["username"] = user[1]
                 return redirect("/home")
             else:
-                return "Invalid login"
+                error = "Invalid username or password"
+                return render_template("login.html", error=error)
 
     conn.close()
     return render_template("login.html")
@@ -141,7 +152,7 @@ def add_transaction():
 
     return redirect("/home")
 
-# 💰 BUDGET (FIXED PER USER)
+# 💰 BUDGET
 @app.route("/budget", methods=["GET", "POST"])
 def budget():
     if "user_id" not in session:
@@ -150,7 +161,6 @@ def budget():
     conn = get_db()
     cur = conn.cursor()
 
-    # Save budget
     if request.method == "POST":
         amount = float(request.form["budget"])
 
@@ -159,11 +169,10 @@ def budget():
             "INSERT INTO budget (total, user_id) VALUES (?, ?)",
             (amount, session["user_id"])
         )
-
         conn.commit()
+
         return redirect("/budget")
 
-    # Get transactions
     cur.execute(
         "SELECT * FROM transactions WHERE user_id=?",
         (session["user_id"],)
@@ -174,7 +183,6 @@ def budget():
     expenses = sum(t[1] for t in transactions if t[3] == "expense")
     remaining = income - expenses
 
-    # Get user-specific budget
     cur.execute(
         "SELECT total FROM budget WHERE user_id=?",
         (session["user_id"],)
@@ -209,7 +217,7 @@ def settings():
         return redirect("/")
     return render_template("settings.html", username=session["username"])
 
-# 🔄 RESET USER DATA
+# 🔄 RESET
 @app.route("/reset", methods=["POST"])
 def reset():
     if "user_id" not in session:

@@ -42,3 +42,65 @@ body {
             padding: 10px;
             margin-top: 10px;
         }
+
+
+    /*-------------------------------------------------------*/
+/* LOGIN PAGE */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Bigger box */
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    width: 350px; /* 🔥 wider */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Headings */
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Inputs - full width */
+.login-box input {
+    width: 92%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* Buttons stacked */
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+}
+
+/* Divider */
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    color: #888;
+}
+
+/* Messages */
+.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
