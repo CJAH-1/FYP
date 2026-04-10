@@ -1,3 +1,52 @@
 --- live launch page: http://127.0.0.1:5000
 
 --- username ask password ask
+
+
+   <style>
+     body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .card {
+            background: #f4f4f4;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .over {
+            color: red;
+            font-weight: bold;
+        }
+
+        .good {
+            color: green;
+            font-weight: bold;
+        }
+
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+    </style>     
