@@ -21,5 +21,60 @@
         <a href="/logout">Logout</a>
     </div>
 </div>
+
+<div class="container">
+
+<div class="card">
+    <h3>Filters</h3>
+    <form method="GET">
+        <input type="date" name="start">
+        <input type="date" name="end">
+        <button type="submit">Apply</button>
+    </form>
+</div>
+
+<div class="card">
+    <canvas id="pieChart"></canvas>
+</div>
+
+<div class="card">
+    <canvas id="lineChart"></canvas>
+</div>
+
+<div class="card">
+    <canvas id="barChart"></canvas>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const categories = {{ categories|tojson }};
+const timeline = {{ timeline|tojson }};
+const monthly = {{ monthly|tojson }};
+
+new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: { labels: categories.map(x=>x[0]), datasets:[{data:categories.map(x=>x[1])}] },
+    options: { animation:{duration:1500} }
+});
+
+new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: { labels: timeline.map(x=>x[0]), datasets:[{data:timeline.map(x=>x[1])}] }
+});
+
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: monthly.map(x=>x[0]),
+        datasets:[
+            {label:"Income", data:monthly.map(x=>x[1])},
+            {label:"Expenses", data:monthly.map(x=>x[2])}
+        ]
+    }
+});
+</script>
+
 </body>
 </html>

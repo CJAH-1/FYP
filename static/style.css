@@ -1,106 +1,151 @@
 body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-
-        .navbar {
-            background-color: #2c3e50;
-            padding: 15px 30px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-        }
-
-        .container {
-            padding: 30px;
-        }
-
-        .card {
-            background: #f4f4f4;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-
-        .over {
-            color: red;
-            font-weight: bold;
-        }
-
-        .good {
-            color: green;
-            font-weight: bold;
-        }
-
-        input, button {
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-
-    /*-------------------------------------------------------*/
-/* LOGIN PAGE */
-.login-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: #f4f6f8;
 }
 
-/* Bigger box */
-.login-box {
+/* NAVBAR */
+.navbar {
     background: white;
-    padding: 40px;
-    border-radius: 12px;
-    width: 350px; /* 🔥 wider */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    max-width: 1200px;
+    margin: auto;
 }
 
-/* Headings */
-.login-box h2 {
-    text-align: center;
-    margin-bottom: 25px;
+.navbar a {
+    text-decoration: none;
+    margin-left: 20px;
+    color: #333;
 }
 
-/* Inputs - full width */
-.login-box input {
-    width: 92%;
-    padding: 12px;
-    margin-bottom: 15px;
+/* CONTAINER (FIXED WIDTH) */
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* TITLE */
+.welcome {
+    margin-bottom: 20px;
+}
+
+/* GRID */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* CARD */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* MAIN CARD RESPONSIVE */
+@media (min-width: 900px) {
+    .main-card {
+        grid-column: span 2;
+    }
+}
+
+/* BALANCE */
+.balance {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* MINI STATS */
+.mini-stats {
+    display: flex;
+    justify-content: space-between;
     font-size: 14px;
+    color: #555;
 }
 
-/* Buttons stacked */
-.login-box button {
+/* PROGRESS BAR FIXED */
+.progress-bar {
+    width: 100%;
+    background: #eee;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress {
+    height: 12px;
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+/* ALERTS */
+.warning {
+    color: #f4a261;
+}
+
+.danger {
+    color: #e63946;
+}
+
+.small {
+    font-size: 13px;
+}
+
+/* INSIGHTS */
+.tip {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* FORM */
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+button {
     width: 100%;
     padding: 12px;
-    margin-top: 5px;
+    background: #14213d;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
 }
 
-/* Divider */
-.divider {
-    text-align: center;
-    margin: 25px 0;
-    color: #888;
+/* TABLE FIX */
+.table-wrapper {
+    overflow-x: auto;
 }
 
-/* Messages */
-.error {
-    color: red;
-    text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.success {
-    color: green;
-    text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
+td, th {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* COLORS */
+.income {
+    color: #2a9d8f;
+    font-weight: 600;
+}
+
+.expense {
+    color: #e63946;
+    font-weight: 600;
 }

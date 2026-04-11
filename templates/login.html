@@ -22,25 +22,73 @@
     <form method="POST">
         <input type="hidden" name="action" value="login">
 
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
+        <input type="text" name="username" placeholder="Username or Email" required>
+
+        <div class="password-wrapper">
+            <input type="password" id="login-password" name="password" placeholder="Password" required>
+            <span class="toggle-icon" onclick="togglePassword('login-password', this)">👁</span>
+        </div>
 
         <button type="submit">Login</button>
     </form>
 
     <div class="divider">OR</div>
 
-    <!-- SIGN UP -->
-    <form method="POST">
+    <!-- SIGNUP -->
+    <form method="POST" onsubmit="return validateSignup()">
         <input type="hidden" name="action" value="signup">
 
-        <input type="text" name="username" placeholder="Create Username" required>
-        <input type="password" name="password" placeholder="Create Password" required>
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="email" name="email" placeholder="Email" required>
+
+        <div class="password-wrapper">
+            <input type="password" id="signup-password" name="password" placeholder="Password" required>
+            <span class="toggle-icon" onclick="togglePassword('signup-password', this)">👁</span>
+        </div>
+
+        <div class="password-wrapper">
+            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+            <span class="toggle-icon" onclick="togglePassword('confirm-password', this)">👁</span>
+        </div>
+
+        <div id="validation-msg" class="validation"></div>
 
         <button type="submit">Sign Up</button>
     </form>
 
 </div>
 
+<script>
+function togglePassword(id, icon) {
+    const input = document.getElementById(id);
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈"; // change icon when visible
+    } else {
+        input.type = "password";
+        icon.textContent = "👁";
+    }
+}
+
+function validateSignup() {
+    const password = document.getElementById("signup-password").value;
+    const confirm = document.getElementById("confirm-password").value;
+    const msg = document.getElementById("validation-msg");
+
+    if (password.length < 6) {
+        msg.innerText = "Password must be at least 6 characters";
+        return false;
+    }
+
+    if (password !== confirm) {
+        msg.innerText = "Passwords do not match";
+        return false;
+    }
+
+    msg.innerText = "";
+    return true;
+}
+</script>
 </body>
 </html>
