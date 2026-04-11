@@ -92,7 +92,7 @@ def login():
 
     return render_template("login.html")
 
-# 🏠 DASHBOARD (MONZO STYLE)
+# 🏠 DASHBOARD
 @app.route("/home")
 def home():
     if "user_id" not in session:
@@ -104,7 +104,7 @@ def home():
     # Filters
     start = request.args.get("start")
     end = request.args.get("end")
-    category = request.args.get("category")
+    category_filter = request.args.get("category")
 
     query = "SELECT * FROM transactions WHERE user_id=?"
     params = [session["user_id"]]
@@ -113,9 +113,11 @@ def home():
         query += " AND date BETWEEN ? AND ?"
         params += [start, end]
 
-    if category:
+    if category_filter:
         query += " AND category=?"
-        params.append(category)
+        params.append(category_filter)
+
+    query += " ORDER BY date DESC"
 
     cur.execute(query, params)
     data = cur.fetchall()
@@ -129,6 +131,80 @@ def home():
     budget = row[0] if row else 0
 
     percent = (expenses / budget * 100) if budget > 0 else 0
+    remaining = income - expenses
+
+    # CATEGORY TOTALS
+    categories = {}
+    for t in data:
+        if t[3] == "expense":
+            categories[t[2]] = categories.get(t[2], 0) + t[1]
+
+    # ================= AI INSIGHTS ENGINE =================
+    insights = []
+
+    # 1. Income vs expenses
+    if expenses > income:
+        insights.append("You are spending more than you earn. Immediate action is recommended.")
+    else:
+        insights.append("Your income currently covers your expenses.")
+
+    # 2. Budget pressure
+    if percent > 100:
+        insights.append("You have exceeded your budget. Review spending urgently.")
+    elif percent > 85:
+        insights.append("You are very close to your budget limit.")
+    elif percent > 70:
+        insights.append("Spending is increasing—monitor closely.")
+
+    # 3. Category dominance
+    for category, total in categories.items():
+        if total > expenses * 0.35:
+            if category.lower() == "food":
+                insights.append("High food spending detected. Try cheaper brands or meal prepping.")
+            elif category.lower() == "housing":
+                insights.append("Housing costs dominate your spending. Review bills or rent.")
+            elif category.lower() == "clothing":
+                insights.append("Clothing spending is high. Try limiting non-essential purchases.")
+            else:
+                insights.append(f"High spending in {category}. Consider reducing this category.")
+
+    # 4. RECENT vs OLD TREND
+    recent = data[:5]
+    older = data[5:10]
+
+    recent_spend = sum(t[1] for t in recent if t[3] == "expense")
+    older_spend = sum(t[1] for t in older if t[3] == "expense")
+
+    if older_spend > 0:
+        change = ((recent_spend - older_spend) / older_spend) * 100
+
+        if change > 25:
+            insights.append(f"Spending increased by {round(change,1)}% recently.")
+        elif change < -25:
+            insights.append(f"Spending decreased by {round(abs(change),1)}%. Good progress!")
+
+    # 5. SPIKE DETECTION
+    if data:
+        largest = max(data, key=lambda t: t[1])
+        if largest[1] > (expenses * 0.3):
+            insights.append(f"Large transaction detected (£{largest[1]}). Consider reviewing it.")
+
+    # 6. SAVINGS
+    if income > expenses:
+        savings = income - expenses
+        insights.append(f"You are saving around £{round(savings,2)} this period.")
+    else:
+        insights.append("You are not currently saving. Try reducing small daily costs.")
+
+    # 7. SMART TIPS
+    if categories.get("Food", 0) > 100:
+        insights.append("Try supermarket own-brand products to reduce food costs.")
+
+    if categories.get("Misc", 0) > expenses * 0.25:
+        insights.append("High 'Misc' spending detected—consider categorising it better.")
+
+    if not insights:
+        insights.append("Your finances look healthy. Keep it up.")
 
     conn.close()
 
@@ -138,9 +214,10 @@ def home():
         transactions=data,
         income=income,
         expenses=expenses,
-        remaining=income-expenses,
+        remaining=remaining,
         percent=percent,
-        budget=budget
+        budget=budget,
+        insights=insights
     )
 
 # ➕ ADD

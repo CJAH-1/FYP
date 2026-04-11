@@ -1,61 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <title>Login</title>
 </head>
+
 <body class="login-page">
 
-<div class="login-box">
+<div class="login-container">
 
-    <h2>Finance Tracker</h2>
+    <!-- LEFT SIDE -->
+    <div class="login-left">
+        <h1>Finance</h1>
+        <p>Track your money.<br>Stay in control.</p>
+    </div>
 
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+    <!-- RIGHT SIDE -->
+    <div class="login-box">
 
-    {% if success %}
-        <p class="success">{{ success }}</p>
-    {% endif %}
+        <h2>Welcome Back</h2>
 
-    <!-- LOGIN -->
-    <form method="POST">
-        <input type="hidden" name="action" value="login">
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
 
-        <input type="text" name="username" placeholder="Username or Email" required>
+        {% if success %}
+            <p class="success">{{ success }}</p>
+        {% endif %}
 
-        <div class="password-wrapper">
-            <input type="password" id="login-password" name="password" placeholder="Password" required>
-            <span class="toggle-icon" onclick="togglePassword('login-password', this)">👁</span>
-        </div>
+        <!-- LOGIN -->
+        <form method="POST">
+            <input type="hidden" name="action" value="login">
 
-        <button type="submit">Login</button>
-    </form>
+            <input type="text" name="username" placeholder="Username or Email" required>
 
-    <div class="divider">OR</div>
+            <div class="password-wrapper">
+                <input type="password" id="login-password" name="password" placeholder="Password" required>
+                <span class="toggle-icon" onclick="togglePassword('login-password', this)">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+            </div>
 
-    <!-- SIGNUP -->
-    <form method="POST" onsubmit="return validateSignup()">
-        <input type="hidden" name="action" value="signup">
+            <button type="submit">Login</button>
+        </form>
 
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="email" name="email" placeholder="Email" required>
+        <div class="divider">OR</div>
 
-        <div class="password-wrapper">
-            <input type="password" id="signup-password" name="password" placeholder="Password" required>
-            <span class="toggle-icon" onclick="togglePassword('signup-password', this)">👁</span>
-        </div>
+        <!-- SIGN UP -->
+        <form method="POST" onsubmit="return validateSignup()">
+            <input type="hidden" name="action" value="signup">
 
-        <div class="password-wrapper">
-            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
-            <span class="toggle-icon" onclick="togglePassword('confirm-password', this)">👁</span>
-        </div>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
 
-        <div id="validation-msg" class="validation"></div>
+            <div class="password-wrapper">
+                <input type="password" id="signup-password" name="password" placeholder="Password" required>
+                <span class="toggle-icon" onclick="togglePassword('signup-password', this)">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+            </div>
 
-        <button type="submit">Sign Up</button>
-    </form>
+            <div class="password-wrapper">
+                <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                <span class="toggle-icon" onclick="togglePassword('confirm-password', this)">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5C5 5 2 12 2 12s3 7 10 7 10-7 10-7-3-7-10-7z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+            </div>
 
+            <div id="validation-msg" class="validation"></div>
+
+            <button type="submit">Create Account</button>
+        </form>
+
+    </div>
 </div>
 
 <script>
@@ -64,10 +90,10 @@ function togglePassword(id, icon) {
 
     if (input.type === "password") {
         input.type = "text";
-        icon.textContent = "🙈"; // change icon when visible
+        icon.style.opacity = "0.5";
     } else {
         input.type = "password";
-        icon.textContent = "👁";
+        icon.style.opacity = "1";
     }
 }
 
@@ -90,5 +116,6 @@ function validateSignup() {
     return true;
 }
 </script>
+
 </body>
 </html>

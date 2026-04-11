@@ -50,22 +50,6 @@
         {% endif %}
     </div>
 
-    <!-- INSIGHTS -->
-    <div class="card">
-        <h3>Insights</h3>
-
-        {% if expenses > income %}
-            <p>You’re spending more than you earn.</p>
-        {% else %}
-            <p>Your finances are stable.</p>
-        {% endif %}
-
-        {% if percent > 80 %}
-            <p>Spending is higher than usual.</p>
-        {% endif %}
-
-        <p class="tip">💡 Try reducing non-essential spending.</p>
-    </div>
 
     <!-- QUICK ADD -->
     <div class="card">
@@ -94,6 +78,17 @@
         </form>
     </div>
 
+</div>
+
+
+    <div class="card">
+    <h3>Smart AI Insights</h3>
+
+    {% for insight in insights %}
+        <div class="insight-item">
+            💡 {{ insight }}
+        </div>
+    {% endfor %}
 </div>
 
 <!-- TRANSACTIONS -->

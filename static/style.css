@@ -1,10 +1,11 @@
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     margin: 0;
-    background: #f4f6f8;
+    background: #f5f7fa;
+    color: #1f2937;
 }
 
-/* NAVBAR */
+/* ================= NAVBAR ================= */
 .navbar {
     background: white;
     padding: 18px 20px;
@@ -21,34 +22,43 @@ body {
     color: #333;
 }
 
-/* CONTAINER (FIXED WIDTH) */
+/* ================= CONTAINER ================= */
 .container {
     padding: 20px;
     max-width: 1200px;
     margin: auto;
 }
 
-/* TITLE */
-.welcome {
-    margin-bottom: 20px;
-}
-
-/* GRID */
+/* ================= DASHBOARD ================= */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
 }
 
-/* CARD */
 .card {
     background: white;
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+/* AI INSIGHTS */
+.insight-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
-/* MAIN CARD RESPONSIVE */
+.icon {
+    font-size: 16px;
+}
+
+/* MAIN CARD */
 @media (min-width: 900px) {
     .main-card {
         grid-column: span 2;
@@ -57,9 +67,8 @@ body {
 
 /* BALANCE */
 .balance {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: bold;
-    margin: 10px 0;
 }
 
 /* MINI STATS */
@@ -67,13 +76,13 @@ body {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
-    color: #555;
+    opacity: 0.8;
 }
 
-/* PROGRESS BAR FIXED */
+/* ================= PROGRESS ================= */
 .progress-bar {
     width: 100%;
-    background: #eee;
+    background: #e5e7eb;
     border-radius: 10px;
     margin-top: 10px;
     overflow: hidden;
@@ -86,45 +95,35 @@ body {
 }
 
 /* ALERTS */
-.warning {
-    color: #f4a261;
-}
+.warning { color: #f59e0b; }
+.danger { color: #ef4444; }
 
-.danger {
-    color: #e63946;
-}
-
-.small {
-    font-size: 13px;
-}
-
-/* INSIGHTS */
-.tip {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #555;
-}
-
-/* FORM */
+/* ================= FORM ================= */
 input, select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #ddd;
+    box-sizing: border-box; /* 🔥 FIXES INPUT SIZE */
 }
 
 button {
     width: 100%;
     padding: 12px;
-    background: #14213d;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
+    cursor: pointer;
 }
 
-/* TABLE FIX */
+button:hover {
+    opacity: 0.9;
+}
+
+/* ================= TABLE ================= */
 .table-wrapper {
     overflow-x: auto;
 }
@@ -140,12 +139,144 @@ td, th {
 }
 
 /* COLORS */
-.income {
-    color: #2a9d8f;
-    font-weight: 600;
+.income { color: #10b981; font-weight: 600; }
+.expense { color: #ef4444; font-weight: 600; }
+
+/* ================= LOGIN PAGE ================= */
+.login-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.expense {
-    color: #e63946;
-    font-weight: 600;
+/* LEFT SIDE */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+}
+
+.login-left h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.login-left p {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* RIGHT SIDE */
+.login-box {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 500px;
+    margin: auto;
+    background: white;
+}
+
+/* INPUTS (FIXED SIZE) */
+.login-box input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-sizing: border-box; /* 🔥 KEY FIX */
+}
+
+/* PASSWORD WRAPPER */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+/* ICON */
+.toggle-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.toggle-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+}
+
+.toggle-icon:hover {
+    color: #111827;
+}
+
+/* TEXT */
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    color: #888;
+}
+
+.error {
+    color: #ef4444;
+    text-align: center;
+}
+
+.success {
+    color: #10b981;
+    text-align: center;
+}
+
+.validation {
+    color: #ef4444;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 800px) {
+
+    .login-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .login-left {
+        height: 180px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .login-left h1 {
+        font-size: 28px;
+    }
+
+    .login-left p {
+        font-size: 14px;
+    }
+
+    .login-box {
+        padding: 25px;
+        width: 100%;
+        max-width: none;
+    }
+
+    .container {
+        padding: 15px;
+    }
 }
