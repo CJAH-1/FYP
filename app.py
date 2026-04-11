@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3, os
-from datetime import timedelta
+from datetime import timedelta, datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -48,7 +48,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# 🔐 LOGIN
+# LOGIN
 @app.route("/", methods=["GET", "POST"])
 def login():
     conn = get_db()
@@ -92,7 +92,7 @@ def login():
 
     return render_template("login.html")
 
-# 🏠 DASHBOARD
+# HOME
 @app.route("/home")
 def home():
     if "user_id" not in session:
@@ -101,110 +101,18 @@ def home():
     conn = get_db()
     cur = conn.cursor()
 
-    # Filters
-    start = request.args.get("start")
-    end = request.args.get("end")
-    category_filter = request.args.get("category")
-
-    query = "SELECT * FROM transactions WHERE user_id=?"
-    params = [session["user_id"]]
-
-    if start and end:
-        query += " AND date BETWEEN ? AND ?"
-        params += [start, end]
-
-    if category_filter:
-        query += " AND category=?"
-        params.append(category_filter)
-
-    query += " ORDER BY date DESC"
-
-    cur.execute(query, params)
+    cur.execute("SELECT * FROM transactions WHERE user_id=? ORDER BY date DESC", (session["user_id"],))
     data = cur.fetchall()
 
     income = sum(t[1] for t in data if t[3] == "income")
     expenses = sum(t[1] for t in data if t[3] == "expense")
 
-    # Budget
     cur.execute("SELECT total FROM budget WHERE user_id=?", (session["user_id"],))
     row = cur.fetchone()
     budget = row[0] if row else 0
 
     percent = (expenses / budget * 100) if budget > 0 else 0
     remaining = income - expenses
-
-    # CATEGORY TOTALS
-    categories = {}
-    for t in data:
-        if t[3] == "expense":
-            categories[t[2]] = categories.get(t[2], 0) + t[1]
-
-    # ================= AI INSIGHTS ENGINE =================
-    insights = []
-
-    # 1. Income vs expenses
-    if expenses > income:
-        insights.append("You are spending more than you earn. Immediate action is recommended.")
-    else:
-        insights.append("Your income currently covers your expenses.")
-
-    # 2. Budget pressure
-    if percent > 100:
-        insights.append("You have exceeded your budget. Review spending urgently.")
-    elif percent > 85:
-        insights.append("You are very close to your budget limit.")
-    elif percent > 70:
-        insights.append("Spending is increasing—monitor closely.")
-
-    # 3. Category dominance
-    for category, total in categories.items():
-        if total > expenses * 0.35:
-            if category.lower() == "food":
-                insights.append("High food spending detected. Try cheaper brands or meal prepping.")
-            elif category.lower() == "housing":
-                insights.append("Housing costs dominate your spending. Review bills or rent.")
-            elif category.lower() == "clothing":
-                insights.append("Clothing spending is high. Try limiting non-essential purchases.")
-            else:
-                insights.append(f"High spending in {category}. Consider reducing this category.")
-
-    # 4. RECENT vs OLD TREND
-    recent = data[:5]
-    older = data[5:10]
-
-    recent_spend = sum(t[1] for t in recent if t[3] == "expense")
-    older_spend = sum(t[1] for t in older if t[3] == "expense")
-
-    if older_spend > 0:
-        change = ((recent_spend - older_spend) / older_spend) * 100
-
-        if change > 25:
-            insights.append(f"Spending increased by {round(change,1)}% recently.")
-        elif change < -25:
-            insights.append(f"Spending decreased by {round(abs(change),1)}%. Good progress!")
-
-    # 5. SPIKE DETECTION
-    if data:
-        largest = max(data, key=lambda t: t[1])
-        if largest[1] > (expenses * 0.3):
-            insights.append(f"Large transaction detected (£{largest[1]}). Consider reviewing it.")
-
-    # 6. SAVINGS
-    if income > expenses:
-        savings = income - expenses
-        insights.append(f"You are saving around £{round(savings,2)} this period.")
-    else:
-        insights.append("You are not currently saving. Try reducing small daily costs.")
-
-    # 7. SMART TIPS
-    if categories.get("Food", 0) > 100:
-        insights.append("Try supermarket own-brand products to reduce food costs.")
-
-    if categories.get("Misc", 0) > expenses * 0.25:
-        insights.append("High 'Misc' spending detected—consider categorising it better.")
-
-    if not insights:
-        insights.append("Your finances look healthy. Keep it up.")
 
     conn.close()
 
@@ -216,11 +124,10 @@ def home():
         expenses=expenses,
         remaining=remaining,
         percent=percent,
-        budget=budget,
-        insights=insights
+        budget=budget
     )
 
-# ➕ ADD
+# ADD
 @app.route("/add", methods=["POST"])
 def add():
     conn = get_db()
@@ -240,7 +147,7 @@ def add():
     conn.commit()
     return redirect("/home")
 
-# 💰 BUDGET
+# BUDGET
 @app.route("/budget", methods=["GET", "POST"])
 def budget():
     conn = get_db()
@@ -273,28 +180,36 @@ def budget():
         over=over
     )
 
-# 📊 STATISTICS
+# ================= FINAL BOSS STATISTICS =================
 @app.route("/statistics")
 def stats():
+    if "user_id" not in session:
+        return redirect("/")
+
     conn = get_db()
     cur = conn.cursor()
+    uid = session["user_id"]
 
+    # CATEGORY
     cur.execute("""
     SELECT category, SUM(amount)
     FROM transactions
     WHERE type='expense' AND user_id=?
     GROUP BY category
-    """, (session["user_id"],))
+    """, (uid,))
     categories = cur.fetchall()
 
+    # TIMELINE
     cur.execute("""
     SELECT date, SUM(amount)
     FROM transactions
     WHERE user_id=?
     GROUP BY date
-    """, (session["user_id"],))
+    ORDER BY date
+    """, (uid,))
     timeline = cur.fetchall()
 
+    # MONTHLY
     cur.execute("""
     SELECT strftime('%Y-%m', date),
            SUM(CASE WHEN type='income' THEN amount ELSE 0 END),
@@ -302,13 +217,71 @@ def stats():
     FROM transactions
     WHERE user_id=?
     GROUP BY strftime('%Y-%m', date)
-    """, (session["user_id"],))
+    ORDER BY strftime('%Y-%m', date)
+    """, (uid,))
     monthly = cur.fetchall()
+
+    # 🔮 PREDICTIONS
+    predictions = []
+    if len(monthly) >= 2:
+        last = monthly[-1]
+        prev = monthly[-2]
+
+        pred_income = last[1] + (last[1] - prev[1])
+        pred_expense = last[2] + (last[2] - prev[2])
+
+        predictions.append(f"Next income estimate: £{round(pred_income,2)}")
+        predictions.append(f"Next expenses estimate: £{round(pred_expense,2)}")
+
+        if pred_expense > pred_income:
+            predictions.append("⚠ You may overspend next month.")
+
+    # 🤖 AI INSIGHTS
+    insights = []
+    total_expenses = sum(x[1] for x in categories)
+
+    for cat, total in categories:
+        if total > total_expenses * 0.4:
+            insights.append(f"{cat} dominates your spending.")
+
+        if cat.lower() == "food" and total > 100:
+            insights.append("Try cheaper food brands or meal prep.")
+
+    # FINAL BOSS: Spending Score
+    score = 100
+    if len(monthly) >= 2:
+        if monthly[-1][2] > monthly[-2][2]:
+            score -= 20
+
+    if total_expenses > 0:
+        score -= int((total_expenses / 1000) * 10)
+
+    score = max(score, 0)
+
+    # FINAL BOSS: Run-out prediction
+    runout = None
+    cur.execute("SELECT SUM(amount) FROM transactions WHERE type='income' AND user_id=?", (uid,))
+    income_total = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT SUM(amount) FROM transactions WHERE type='expense' AND user_id=?", (uid,))
+    expense_total = cur.fetchone()[0] or 0
+
+    if expense_total > 0:
+        daily = expense_total / max(len(timeline),1)
+        if daily > 0:
+            days_left = int((income_total - expense_total) / daily)
+            runout = f"At current spending, funds may last ~{days_left} days."
+
+    conn.close()
 
     return render_template("statistics.html",
         categories=categories,
         timeline=timeline,
-        monthly=monthly
+        monthly=monthly,
+        predictions=predictions,
+        insights=insights,
+        score=score,
+        runout=runout
     )
 
 @app.route("/logout")

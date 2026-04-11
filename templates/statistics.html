@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Budget</title>
-
-      
-     <link rel="stylesheet" href="/static/style.css">
-       
-
+    <title>Statistics</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <!-- NAVBAR -->
@@ -24,6 +22,30 @@
 
 <div class="container">
 
+<h2>📊 Statistics Dashboard</h2>
+
+<!-- TOP SUMMARY -->
+<div class="dashboard">
+
+    <div class="card">
+        <h3>💯 Spending Score</h3>
+        <p class="big-number">{{ score }}/100</p>
+
+        {% if runout %}
+            <p class="warning">{{ runout }}</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>🔮 Predictions</h3>
+        {% for p in predictions %}
+            <p>{{ p }}</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- FILTERS -->
 <div class="card">
     <h3>Filters</h3>
     <form method="GET">
@@ -33,44 +55,83 @@
     </form>
 </div>
 
+<!-- AI INSIGHTS -->
 <div class="card">
-    <canvas id="pieChart"></canvas>
+    <h3>🤖 AI Insights</h3>
+
+    {% for insight in insights %}
+        <div class="insight-item">
+            <span>💡</span>
+            <span>{{ insight }}</span>
+        </div>
+    {% endfor %}
 </div>
 
-<div class="card">
-    <canvas id="lineChart"></canvas>
+<!-- CHARTS GRID -->
+<div class="dashboard">
+
+    <div class="card">
+        <h3>Spending by Category</h3>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Transaction Timeline</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Monthly Overview</h3>
+        <canvas id="barChart"></canvas>
+    </div>
+
 </div>
 
-<div class="card">
-    <canvas id="barChart"></canvas>
 </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const categories = {{ categories|tojson }};
 const timeline = {{ timeline|tojson }};
 const monthly = {{ monthly|tojson }};
 
+/* PIE */
 new Chart(document.getElementById('pieChart'), {
     type: 'pie',
-    data: { labels: categories.map(x=>x[0]), datasets:[{data:categories.map(x=>x[1])}] },
-    options: { animation:{duration:1500} }
+    data: {
+        labels: categories.map(x=>x[0]),
+        datasets: [{
+            data: categories.map(x=>x[1])
+        }]
+    }
 });
 
+/* LINE */
 new Chart(document.getElementById('lineChart'), {
     type: 'line',
-    data: { labels: timeline.map(x=>x[0]), datasets:[{data:timeline.map(x=>x[1])}] }
+    data: {
+        labels: timeline.map(x=>x[0]),
+        datasets: [{
+            label: "Spending",
+            data: timeline.map(x=>x[1]),
+            fill: false
+        }]
+    }
 });
 
+/* BAR */
 new Chart(document.getElementById('barChart'), {
     type: 'bar',
     data: {
         labels: monthly.map(x=>x[0]),
         datasets:[
-            {label:"Income", data:monthly.map(x=>x[1])},
-            {label:"Expenses", data:monthly.map(x=>x[2])}
+            {
+                label:"Income",
+                data: monthly.map(x=>x[1])
+            },
+            {
+                label:"Expenses",
+                data: monthly.map(x=>x[2])
+            }
         ]
     }
 });

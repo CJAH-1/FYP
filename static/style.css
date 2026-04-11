@@ -280,3 +280,31 @@ td, th {
         padding: 15px;
     }
 }
+
+/* BIG NUMBER (score) */
+.big-number {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+/* INSIGHTS IMPROVED */
+.insight-item {
+    display: flex;
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* WARNING TEXT */
+.warning {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+/* CHART FIX */
+canvas {
+    width: 100% !important;
+    max-height: 300px;
+}
